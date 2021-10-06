@@ -1,0 +1,159 @@
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: compositepostgresqlinstances.databases.lmig.com
+spec:
+  connectionSecretKeys:
+  - username
+  - password
+  - hostname
+  - port
+  defaultCompositionRef:
+    name: postgresql-aws
+  group: databases.lmig.com
+  names:
+    kind: CompositePostgreSQLInstance
+    plural: compositepostgresqlinstances
+  claimNames:
+    kind: PostgreSQLInstance
+    plural: postgresqlinstances
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              parameters:
+                type: object
+                properties:
+                  version:
+                    description: PostgreSQL Engine Version
+                    type: string
+                    enum: ["11", "12", "13"]
+                  storageGB:
+                    type: integer
+                  location:
+                    description: Geographic location of this PostgreSQL server.
+                    type: string
+                    default: us-east-1
+                  deploymentGuid:
+                    description: CloudForge Metadata 
+                    type: string
+                  allocatedStorage:
+                    description: The storage allocated to database.
+                    type: number
+                    default: 20
+                  allowMajorVersionUpgrade:
+                    description: Allows the database to be upgraded to the next major version.
+                    type: boolean
+                    default: false
+                  dbInstancePort:
+                    description: The PostGreSQL database port number.
+                    type: number
+                    default: 5432
+                  dbInstanceClass:
+                    description: The class of the instance machine.
+                    type: string
+                    default: db.t3.medium
+                  dbName:
+                    description: The name of application database.
+                    type: string
+                  dbSubnetGroup:
+                    description: The database subnet group.
+                    type: string
+                  deleteAutomatedBackups:
+                    description: Indicates whether automated backups should be deleted (true) or retained (false) when you delete a database instance. The default is false.
+                    type: boolean
+                    default: false
+                  enableAutoMinorVersionUpgrades:
+                    description: Value that users can set to either enable or opt out of automated minor version upgrades during scheduled maintenance.
+                    type: boolean
+                    default: true
+                  maxAllocatedStorage:
+                    description: The Maximun storage allocated to database. If present this will enable Storage Autoscaling for gp2 and io1 StorageTypes
+                    type: number
+                    default: 0
+                  multiAZ:
+                    description: Specifies whether the database instance is a multiple Availability Zone deployment.
+                    type: boolean
+                    default: false
+                  parameterGroupName:
+                    description: The name of the database parameter group to create.
+                    type: string
+                  spaceThreshold:
+                    description: The amount of free storage the CloudWatch alarm will alert on.
+                    type: number
+                    default: 2000000000
+                  storageIops:
+                    description: The amount of iops for an iops storage type.
+                    type: number
+                    default: 0
+                  storageType:
+                    description: The storage type for the database instance.
+                    type: string
+                    default: gp2
+                  trouxId:
+                    description: Id from our Troux inventory system.
+                    type: string
+                  uniqueEncryptionKeyId:
+                    description: This field should only be set when restoring a database that was previously created and there is a need to use an existing unique KMS key that was created during the previous deployment for encryption.
+                    type: string
+                    default: none
+                  useEnhancedMonitoring:
+                    description: This field determines whether or not the RDS instance will use enhanced monitoring.
+                    type: boolean
+                    default: false
+                  useRdsInstanceScheduler:
+                    description: The ability to opt into using the instance scheduler or not
+                    type: boolean
+                    default: true
+                  useUniqueEncryptionKey:
+                    description: Geographic location of this PostgreSQL server.
+                    type: string
+                  tags:
+                    description: Tags required for compliance
+                    items:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    type: array
+                  verboseTags:
+                    description: Tags required for compliance. Structure specific to KMS
+                    items:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    type: array
+                required:
+                - version
+                - storageGB
+                - dbName
+                - deploymentGuid
+                - tags
+                - verboseTags
+            required:
+            - parameters
+          status:
+            type: object
+            properties:
+              address:
+                description: Address of this PostgreSQL server.
+                type: string
+              adminDSN:
+                description: DSN (Data Source Name) of the PostgreSQL server.
+                type: string
+              kmsKeyArn:
+                description: KMS Key Id Used by Database
+                type: string
+              dbSubnetVpcId:
+                description: VPC ID used by Security group
+                type: string
+              dbParameterGroupName:
+                description: DB Parameter Group Name
+                type: string
